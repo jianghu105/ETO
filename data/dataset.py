@@ -102,7 +102,7 @@ class SELEXDataModule:
             )
         else:
             data_path = self.data_config.get('real_data_path',
-                                             '../dataset/20230531AptDMC双端-MPO.xlsx')
+                                             'dataset/20230531AptDMC双端-MPO.xlsx')
             self.df = load_real_data(
                 data_path,
                 max_sequences=self.data_config.get('max_sequences', None),

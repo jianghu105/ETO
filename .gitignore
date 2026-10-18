@@ -12,9 +12,7 @@ build/
 experiments/
 results/
 
-# Data (too large for GitHub)
-dataset/
-*.xlsx
+# Data (exclude processed outputs, keep source xlsx)
 *.parquet
 
 # IDE

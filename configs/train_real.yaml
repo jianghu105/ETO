@@ -22,7 +22,7 @@ data:
     R9: 6
     R10: 7
     R11: 8
-  real_data_path: "../dataset/20230531AptDMC双端-MPO.xlsx"
+  real_data_path: "dataset/20230531AptDMC双端-MPO.xlsx"
   max_sequences: null
   min_total_count: 1
   synthetic:
