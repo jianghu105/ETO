@@ -35,7 +35,7 @@ def detect_environment() -> dict:
     if torch.cuda.is_available():
         env['gpu_name'] = torch.cuda.get_device_name(0)
         env['gpu_memory_gb'] = round(
-            torch.cuda.get_device_properties(0).total_mem / 1e9, 1)
+            torch.cuda.get_device_properties(0).total_memory / 1e9, 1)
     else:
         env['gpu_name'] = None
         env['gpu_memory_gb'] = 0
