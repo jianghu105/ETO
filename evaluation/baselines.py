@@ -253,12 +253,12 @@ def evaluate_baselines(samples: List[Dict],
 
     results = {}
 
-    n = len(samples)
-    ea_all = np.array([s['evolutionary_advantage'].item() for s in samples])
-    log_count_curr = np.array([s['log_count_curr'].item() for s in samples])
-    rel_abund = np.array([s['relative_abundance_curr'].item() for s in samples])
-    ea_valid = np.array([s['ea_valid'].item() if 'ea_valid' in s else True for s in samples])
-    pair_indices = np.array([s['pair_idx'].item() for s in samples])
+    n = len(arrays['pair_idx'])
+    ea_all = arrays['evolutionary_advantage']
+    log_count_curr = arrays['log_count_curr']
+    rel_abund = arrays['relative_abundance_curr']
+    ea_valid = arrays.get('ea_valid', np.ones(n, dtype=bool))
+    pair_indices = arrays['pair_idx']
 
     print("=" * 60)
     print("Baseline 1: Current Abundance Ranking")

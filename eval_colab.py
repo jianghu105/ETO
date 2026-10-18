@@ -18,7 +18,6 @@ from data.preprocessing import load_real_data, compute_features, prepare_trainin
 from data.dataset import CompactSELEXDataset
 from models.eto_model import RefactoredETOModel
 from evaluation.metrics import evaluate_model
-from evaluation.baselines import evaluate_baselines
 
 logging.basicConfig(
     level=logging.INFO,
@@ -93,9 +92,21 @@ def main():
     with open(os.path.join(output_dir, 'evaluation_results.json'), 'w') as f:
         json.dump(eval_metrics, f, indent=2)
 
-    # Baselines
-    logger.info("Running baselines...")
-    baseline_results = evaluate_baselines(arrays, df, features)
+    # Baselines (abundance ranking only - CNN baseline requires separate training)
+    logger.info("Running abundance ranking baseline...")
+    from evaluation.baselines import AbundanceRankingBaseline
+    bl = AbundanceRankingBaseline()
+    bl_result = bl.evaluate(
+        arrays['log_count_curr'],
+        arrays['evolutionary_advantage'],
+        arrays['relative_abundance_curr'],
+        ea_valid=arrays.get('ea_valid', np.ones(len(arrays['pair_idx']), dtype=bool)),
+        pair_indices=arrays['pair_idx']
+    )
+    logger.info(f"  Abundance Ranking: spearman={bl_result.get('spearman', 0):.4f} "
+                f"ndcg@50={bl_result.get('ndcg@50', 0):.4f}")
+
+    baseline_results = {'abundance_ranking': bl_result}
     for name, res in baseline_results.items():
         logger.info(f"  [{name}] spearman={res.get('spearman', 0):.4f} "
                      f"ndcg@50={res.get('ndcg@50', 0):.4f} "

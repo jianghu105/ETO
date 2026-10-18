@@ -26,7 +26,6 @@ from models.eto_model import RefactoredETOModel
 from training.trainer import Trainer
 from training.losses import RefactoredETOLoss
 from evaluation.metrics import evaluate_model
-from evaluation.baselines import evaluate_baselines
 
 logging.basicConfig(
     level=logging.INFO,
@@ -184,10 +183,18 @@ def train(config: dict, output_dir: str):
     with open(os.path.join(output_dir, 'evaluation_results.json'), 'w') as f:
         json.dump(eval_metrics, f, indent=2)
 
-    logger.info("Running baselines...")
-    baseline_results = evaluate_baselines(arrays, df, features)
-    for name, res in baseline_results.items():
-        logger.info(f"  Baseline [{name}]: spearman={res.get('spearman', 0):.4f}")
+    logger.info("Running abundance ranking baseline...")
+    from evaluation.baselines import AbundanceRankingBaseline
+    bl = AbundanceRankingBaseline()
+    bl_result = bl.evaluate(
+        arrays['log_count_curr'],
+        arrays['evolutionary_advantage'],
+        arrays['relative_abundance_curr'],
+        ea_valid=arrays.get('ea_valid', np.ones(len(arrays['pair_idx']), dtype=bool)),
+        pair_indices=arrays['pair_idx']
+    )
+    baseline_results = {'abundance_ranking': bl_result}
+    logger.info(f"  Abundance Ranking: spearman={bl_result.get('spearman', 0):.4f}")
 
     with open(os.path.join(output_dir, 'baseline_results.json'), 'w') as f:
         json.dump(baseline_results, f, indent=2)
