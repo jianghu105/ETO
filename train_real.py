@@ -26,6 +26,7 @@ from models.eto_model import RefactoredETOModel
 from training.trainer import Trainer
 from training.losses import RefactoredETOLoss
 from evaluation.metrics import evaluate_model
+from evaluation.baselines import evaluate_baselines
 
 logging.basicConfig(
     level=logging.INFO,
@@ -164,6 +165,27 @@ def train(config: dict, output_dir: str):
 
     logger.info(f"Training complete. Results saved to {output_dir}")
     logger.info(f"Best loss: {trainer.best_loss:.4f}")
+
+    logger.info("Running post-training evaluation...")
+    model.eval()
+    eval_metrics, phi, ea = evaluate_model(model, val_loader, device)
+    logger.info("Evaluation metrics:")
+    for k, v in eval_metrics.items():
+        logger.info(f"  {k}: {v:.4f}")
+
+    import json
+    with open(os.path.join(output_dir, 'evaluation_results.json'), 'w') as f:
+        json.dump(eval_metrics, f, indent=2)
+
+    logger.info("Running baselines...")
+    baseline_results = evaluate_baselines(arrays, df, features)
+    for name, res in baseline_results.items():
+        logger.info(f"  Baseline [{name}]: spearman={res.get('spearman', 0):.4f}")
+
+    with open(os.path.join(output_dir, 'baseline_results.json'), 'w') as f:
+        json.dump(baseline_results, f, indent=2)
+
+    logger.info(f"All results saved to {output_dir}/")
 
     return model, history, features, df
 
