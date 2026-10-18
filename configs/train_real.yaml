@@ -1,0 +1,99 @@
+# ETO Real MPO-SELEX Training Configuration
+#
+# ETO learns a continuous evolutionary transition operator that estimates
+# latent evolutionary advantage under selective environments.
+
+data:
+  seq_length: 36
+  rounds: ["R3", "R5", "R9", "R10", "R11"]
+  round_pairs:
+    - ["R3", "R5"]
+    - ["R5", "R9"]
+    - ["R9", "R10"]
+    - ["R10", "R11"]
+  context_types:
+    R3_R5: "normal"
+    R5_R9: "counter_selection"
+    R9_R10: "recovery"
+    R10_R11: "normal"
+  evolution_time:
+    R3: 0
+    R5: 2
+    R9: 6
+    R10: 7
+    R11: 8
+  real_data_path: "../dataset/20230531AptDMC双端-MPO.xlsx"
+  max_sequences: null
+  min_total_count: 1
+  synthetic:
+    enabled: false
+
+model:
+  sequence_encoder:
+    embedding_dim: 128
+    conv_kernels: [3, 5, 7]
+    conv_filters: 64
+    dropout: 0.1
+  structure_encoder:
+    enabled: true
+    structure_dim: 16
+    dropout: 0.1
+  evolutionary_state:
+    velocity_dim: 1
+    dynamic_dim: 145
+    observation_dim: 1
+  population_encoder:
+    population_dim: 256
+    n_heads: 8
+    dropout: 0.1
+    use_observation: true
+  context_encoder:
+    context_dim: 32
+    n_context_types: 4
+    n_rounds: 10
+    context_embed_dim: 16
+    round_embed_dim: 16
+    n_fourier_freqs: 8
+    use_continuous_time: true
+  transition_operator:
+    hidden_dim: 512
+    n_layers: 3
+    dropout: 0.1
+    max_rollout_steps: 4
+  individual_potential_decoder:
+    hidden_dim: 512
+    dropout: 0.1
+
+training:
+  batch_size: 512
+  epochs: 50
+  lr: 0.0005
+  weight_decay: 0.0001
+  scheduler: "cosine"
+  warmup_steps: 500
+  grad_clip: 1.0
+  lambda_transition: 1.0
+  lambda_population: 0.5
+  lambda_advantage: 1.0
+  lambda_ea_regression: 0.5
+  lambda_rollout: 0.3
+  lambda_smooth: 0.05
+  ranking_margin: 0.1
+  ranking_n_pairs: 256
+  count_dropout_prob: 0.1
+  trajectory_shuffle: false
+  seed: 42
+  device: "cuda"
+  num_workers: 0
+  log_interval: 20
+  save_interval: 10
+  nan_check: true
+  abundance_leakage_check: true
+
+sampling:
+  enabled: true
+  abundance_frac: 0.7
+  weight_round: "R10"
+
+evaluation:
+  output_dir: "experiments/real_v2"

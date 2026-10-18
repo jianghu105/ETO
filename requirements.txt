@@ -1,0 +1,9 @@
+torch>=2.0
+numpy
+pandas
+scipy
+pyyaml
+matplotlib
+seaborn
+openpyxl
+scikit-learn

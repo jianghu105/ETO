@@ -1,0 +1,101 @@
+# ETO v2 Configuration
+# Refactored: Abundance-free pathway, Individual potential decoder, Multi-step rollout
+#
+# ETO learns a continuous evolutionary transition operator that estimates
+# latent evolutionary advantage under selective environments.
+
+data:
+  seq_length: 36
+  rounds: ["R3", "R5", "R9", "R10", "R11"]
+  round_pairs:
+    - ["R3", "R5"]
+    - ["R5", "R9"]
+    - ["R9", "R10"]
+    - ["R10", "R11"]
+  context_types:
+    R3_R5: "normal"
+    R5_R9: "counter_selection"
+    R9_R10: "recovery"
+    R10_R11: "normal"
+  evolution_time:
+    R3: 0
+    R5: 2
+    R9: 6
+    R10: 7
+    R11: 8
+  real_data_path: "../dataset/20230531AptDMC双端-MPO.xlsx"
+  max_sequences: null  # null = use all valid sequences
+  min_total_count: 10
+  synthetic:
+    enabled: false
+    n_sequences: 2000
+    n_families: 20
+    seed: 42
+
+model:
+  sequence_encoder:
+    embedding_dim: 128
+    conv_kernels: [3, 5, 7]
+    conv_filters: 64
+    dropout: 0.1
+  structure_encoder:
+    enabled: true
+    structure_dim: 16
+    dropout: 0.1
+  evolutionary_state:
+    velocity_dim: 1
+    dynamic_dim: 145  # 128 seq_emb + 1 velocity + 16 structure
+    observation_dim: 1  # log_count only
+  population_encoder:
+    population_dim: 256
+    n_heads: 8
+    dropout: 0.1
+    use_observation: true
+  context_encoder:
+    context_dim: 32
+    n_context_types: 4
+    n_rounds: 10
+    context_embed_dim: 16
+    round_embed_dim: 16
+    n_fourier_freqs: 8
+    use_continuous_time: true
+  transition_operator:
+    hidden_dim: 512
+    n_layers: 3
+    dropout: 0.1
+    max_rollout_steps: 4
+  individual_potential_decoder:
+    hidden_dim: 512
+    dropout: 0.1
+  potential_decoder:
+    hidden_dim: 128
+    dropout: 0.1
+
+training:
+  batch_size: 256
+  epochs: 100
+  lr: 0.001
+  weight_decay: 0.0001
+  scheduler: "cosine"
+  warmup_steps: 500
+  grad_clip: 1.0
+  lambda_transition: 1.0
+  lambda_population: 0.5
+  lambda_advantage: 1.0
+  lambda_rollout: 0.3
+  lambda_smooth: 0.05
+  ranking_margin: 0.1
+  ranking_n_pairs: 128
+  count_dropout_prob: 0.1
+  trajectory_shuffle: false
+  seed: 42
+  device: "cuda"
+  num_workers: 0
+  log_interval: 10
+  save_interval: 10
+  nan_check: true
+  abundance_leakage_check: true
+
+evaluation:
+  checkpoint_path: "results/checkpoint_v2.pt"
+  output_dir: "results"
