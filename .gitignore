@@ -7,10 +7,12 @@ build/
 *.egg
 .pytest_cache/
 
-# Checkpoints & experiments
+# Checkpoints (too large for GitHub)
 *.pt
-experiments/
-results/
+
+# Experiment results (keep JSON/CSV/plots, exclude checkpoints)
+# experiments/**/*.pt is excluded above
+# experiments/**/*.json, .csv, .png are tracked
 
 # Data (exclude processed outputs, keep source xlsx)
 *.parquet
