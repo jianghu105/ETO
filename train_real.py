@@ -168,7 +168,14 @@ def train(config: dict, output_dir: str):
 
     logger.info("Running post-training evaluation...")
     model.eval()
-    eval_metrics, phi, ea = evaluate_model(model, val_loader, device)
+
+    from data.dataset import CompactSELEXDataset
+    eval_dataset = CompactSELEXDataset(arrays, count_dropout_prob=0.0)
+    eval_loader = torch.utils.data.DataLoader(
+        eval_dataset, batch_size=training_cfg.get('batch_size', 512),
+        shuffle=False, num_workers=0
+    )
+    eval_metrics, phi, ea = evaluate_model(model, eval_loader, device)
     logger.info("Evaluation metrics:")
     for k, v in eval_metrics.items():
         logger.info(f"  {k}: {v:.4f}")
