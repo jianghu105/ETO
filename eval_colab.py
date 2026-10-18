@@ -115,11 +115,13 @@ def main():
     with open(os.path.join(output_dir, 'baseline_results.json'), 'w') as f:
         json.dump(baseline_results, f, indent=2)
 
-    # Save EPS scores
+    # Save EPS scores (take R3->R5 transition, first 227K entries)
+    n_seqs = len(df)
+    phi_r3r5 = phi[:n_seqs]
     results_df = pd.DataFrame({
-        'sequence': df['sequence'].values[:len(phi)],
-        'EPS_score': phi,
-        'rank': pd.Series(phi).rank(ascending=False).astype(int).values,
+        'sequence': df['sequence'].values,
+        'EPS_score': phi_r3r5,
+        'rank': pd.Series(phi_r3r5).rank(ascending=False).astype(int).values,
     })
     results_df.sort_values('rank').to_csv(
         os.path.join(output_dir, 'predicted_potential.csv'), index=False)
